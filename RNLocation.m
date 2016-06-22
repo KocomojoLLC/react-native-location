@@ -38,6 +38,22 @@ RCT_EXPORT_MODULE()
 
 #pragma mark
 
+
+- (CLCircularRegion *) convertDictToCircularRegion: (NSDictionary *) dict
+{
+    CLLocationCoordinate2D center = CLLocationCoordinate2DMake([dict[@"latitude"]floatValue], [dict[@"longitude"]floatValue]);
+    CLLocationDistance radius = [dict[@"radius"]doubleValue];
+    
+    if(radius > self.locationManager.maximumRegionMonitoringDistance) {
+        radius = self.locationManager.maximumRegionMonitoringDistance;
+    }
+    
+    CLCircularRegion *circularRegion = [[CLCircularRegion alloc]initWithCenter:center radius:radius identifier:dict[@"id"]];
+    
+    return circularRegion;
+}
+
+
 RCT_EXPORT_METHOD(requestAlwaysAuthorization)
 {
     NSLog(@"react-native-location: requestAlwaysAuthorization");
@@ -74,6 +90,16 @@ RCT_EXPORT_METHOD(startMonitoringSignificantLocationChanges)
 {
     NSLog(@"react-native-location: startMonitoringSignificantLocationChanges");
     [self.locationManager startMonitoringSignificantLocationChanges];
+}
+
+RCT_EXPORT_METHOD(startMonitoringForRegion:(NSDictionary *) dict)
+{
+    [self.locationManager startMonitoringForRegion:[self convertDictToCircularRegion:dict]];
+}
+
+RCT_EXPORT_METHOD(stopMonitoringForRegion:(NSDictionary *) dict)
+{
+    [self.locationManager stopMonitoringForRegion:[self convertDictToCircularRegion:dict]];
 }
 
 RCT_EXPORT_METHOD(startUpdatingLocation)
