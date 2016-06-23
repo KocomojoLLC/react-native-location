@@ -71,9 +71,19 @@ RCT_EXPORT_METHOD(getAuthorizationStatus:(RCTResponseSenderBlock)callback)
     callback(@[[self nameForAuthorizationStatus:[CLLocationManager authorizationStatus]]]);
 }
 
-RCT_EXPORT_METHOD(setDesiredAccuracy:(double) accuracy)
+RCT_EXPORT_METHOD(setDesiredAccuracy:(NSString *) accuracy)
 {
-    self.locationManager.desiredAccuracy = accuracy;
+    if([accuracy isEqualToString:@"best"]) {
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    } else if([accuracy isEqualToString:@"ten_meters"]) {
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
+    } else if([accuracy isEqualToString:@"hundred_meters"]) {
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
+    } else if([accuracy isEqualToString:@"kilometer"]) {
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyKilometer;
+    } else if([accuracy isEqualToString:@"three_kilometers"]) {
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers;
+    }
 }
 
 RCT_EXPORT_METHOD(setDistanceFilter:(double) distance)
