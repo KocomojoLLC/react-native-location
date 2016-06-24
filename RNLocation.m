@@ -41,7 +41,7 @@ RCT_EXPORT_MODULE()
 
 - (CLCircularRegion *) convertDictToCircularRegion: (NSDictionary *) dict
 {
-    CLLocationCoordinate2D center = CLLocationCoordinate2DMake([dict[@"latitude"]floatValue], [dict[@"longitude"]floatValue]);
+    CLLocationCoordinate2D center = CLLocationCoordinate2DMake([dict[@"latitude"]doubleValue], [dict[@"longitude"]doubleValue]);
     CLLocationDistance radius = [dict[@"radius"]doubleValue];
     
     if(radius > self.locationManager.maximumRegionMonitoringDistance) {
@@ -105,12 +105,32 @@ RCT_EXPORT_METHOD(startMonitoringSignificantLocationChanges)
 
 RCT_EXPORT_METHOD(startMonitoringForRegion:(NSDictionary *) dict)
 {
-    [self.locationManager startMonitoringForRegion:[self convertDictToCircularRegion:dict]];
+    CLCircularRegion *region = [self convertDictToCircularRegion:dict];
+    
+    NSLog(@"~~~ Monitoring: %f, %f, %f, %@", region.center.latitude, region.center.longitude, region.radius, region.identifier);
+    [self.locationManager startMonitoringForRegion:region];
 }
 
 RCT_EXPORT_METHOD(stopMonitoringForRegion:(NSDictionary *) dict)
 {
+    NSLog(@"Stopping monitoring of: %@", dict);
     [self.locationManager stopMonitoringForRegion:[self convertDictToCircularRegion:dict]];
+}
+
+RCT_EXPORT_METHOD(printMonitoredRegions)
+{
+    for (CLRegion *monitoredRegion in self.locationManager.monitoredRegions) {
+        NSLog(@"monitoredRegion: %@", monitoredRegion);
+    }
+    NSLog(@"Count: %i", [self.locationManager.monitoredRegions count]);
+}
+
+RCT_EXPORT_METHOD(removeAllMonitoredRegions)
+{
+    for (CLRegion *monitoredRegion in self.locationManager.monitoredRegions) {
+        [self.locationManager stopMonitoringForRegion:monitoredRegion];
+    }
+    
 }
 
 RCT_EXPORT_METHOD(startUpdatingLocation)
