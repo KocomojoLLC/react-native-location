@@ -24,15 +24,15 @@ RCT_EXPORT_MODULE()
 {
     if (self = [super init]) {
         self.locationManager = [[CLLocationManager alloc] init];
-
+        
         self.locationManager.delegate = self;
-
+        
         self.locationManager.distanceFilter = kCLDistanceFilterNone;
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-
+        
         self.locationManager.pausesLocationUpdatesAutomatically = NO;
     }
-
+    
     return self;
 }
 
@@ -85,6 +85,7 @@ RCT_EXPORT_METHOD(setDesiredAccuracy:(NSString *) accuracy)
         self.locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers;
     }
 }
+
 
 RCT_EXPORT_METHOD(setDistanceFilter:(double) distance)
 {
@@ -143,19 +144,19 @@ RCT_EXPORT_METHOD(stopUpdatingHeading)
         case kCLAuthorizationStatusAuthorizedAlways:
             NSLog(@"Authorization Status: authorizedAlways");
             return @"authorizedAlways";
-
+            
         case kCLAuthorizationStatusAuthorizedWhenInUse:
             NSLog(@"Authorization Status: authorizedWhenInUse");
             return @"authorizedWhenInUse";
-
+            
         case kCLAuthorizationStatusDenied:
             NSLog(@"Authorization Status: denied");
             return @"denied";
-
+            
         case kCLAuthorizationStatusNotDetermined:
             NSLog(@"Authorization Status: notDetermined");
             return @"notDetermined";
-
+            
         case kCLAuthorizationStatusRestricted:
             NSLog(@"Authorization Status: restricted");
             return @"restricted";
@@ -173,38 +174,76 @@ RCT_EXPORT_METHOD(stopUpdatingHeading)
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading {
-  if (newHeading.headingAccuracy < 0)
-    return;
-
-  // Use the true heading if it is valid.
-  CLLocationDirection heading = ((newHeading.trueHeading > 0) ?
-    newHeading.trueHeading : newHeading.magneticHeading);
-
-  NSDictionary *headingEvent = @{
-    @"heading": @(heading)
-  };
-
-  NSLog(@"heading: %f", heading);
-  [self.bridge.eventDispatcher sendDeviceEventWithName:@"headingUpdated" body:headingEvent];
+    if (newHeading.headingAccuracy < 0)
+        return;
+    
+    // Use the true heading if it is valid.
+    CLLocationDirection heading = ((newHeading.trueHeading > 0) ?
+                                   newHeading.trueHeading : newHeading.magneticHeading);
+    
+    NSDictionary *headingEvent = @{
+                                   @"heading": @(heading)
+                                   };
+    
+    NSLog(@"heading: %f", heading);
+    [self.bridge.eventDispatcher sendDeviceEventWithName:@"headingUpdated" body:headingEvent];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
     CLLocation *location = [locations lastObject];
     NSDictionary *locationEvent = @{
-        @"coords": @{
-            @"latitude": @(location.coordinate.latitude),
-            @"longitude": @(location.coordinate.longitude),
-            @"altitude": @(location.altitude),
-            @"accuracy": @(location.horizontalAccuracy),
-            @"altitudeAccuracy": @(location.verticalAccuracy),
-            @"course": @(location.course),
-            @"speed": @(location.speed),
-        },
-        @"timestamp": @([location.timestamp timeIntervalSince1970] * 1000) // in ms
-    };
-
+                                    @"coords": @{
+                                            @"latitude": @(location.coordinate.latitude),
+                                            @"longitude": @(location.coordinate.longitude),
+                                            @"altitude": @(location.altitude),
+                                            @"accuracy": @(location.horizontalAccuracy),
+                                            @"altitudeAccuracy": @(location.verticalAccuracy),
+                                            @"course": @(location.course),
+                                            @"speed": @(location.speed),
+                                            },
+                                    @"timestamp": @([location.timestamp timeIntervalSince1970] * 1000) // in ms
+                                    };
+    
     NSLog(@"%@: lat: %f, long: %f, altitude: %f", location.timestamp, location.coordinate.latitude, location.coordinate.longitude, location.altitude);
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"locationUpdated" body:locationEvent];
 }
+
+
+-(void)locationManager:(CLLocationManager *)manager
+        didEnterRegion:(CLRegion *)region {
+    
+    if([region isKindOfClass:[CLCircularRegion class]]) {
+        CLCircularRegion *circularRegion = (CLCircularRegion *)region;
+        NSDictionary *event = @{
+                                @"region": circularRegion.identifier,
+                                @"center": @{
+                                        @"latitude": [NSNumber numberWithDouble:circularRegion.center.latitude],
+                                        @"longitude": [NSNumber numberWithDouble:circularRegion.center.longitude]
+                                        },
+                                @"radius": [NSNumber numberWithDouble:circularRegion.radius]
+                                };
+        
+        [self.bridge.eventDispatcher sendDeviceEventWithName:@"circularRegionDidEnter" body:event];
+    }
+}
+
+-(void)locationManager:(CLLocationManager *)manager
+         didExitRegion:(CLRegion *)region {
+    
+    if([region isKindOfClass:[CLCircularRegion class]]) {
+        CLCircularRegion *circularRegion = (CLCircularRegion *)region;
+        NSDictionary *event = @{
+                                @"region": circularRegion.identifier,
+                                @"center": @{
+                                        @"latitude": [NSNumber numberWithDouble:circularRegion.center.latitude],
+                                        @"longitude": [NSNumber numberWithDouble:circularRegion.center.longitude]
+                                        },
+                                @"radius": [NSNumber numberWithDouble:circularRegion.radius]
+                                };
+        
+        [self.bridge.eventDispatcher sendDeviceEventWithName:@"circularRegionDidExit" body:event];
+    }
+}
+
 
 @end
