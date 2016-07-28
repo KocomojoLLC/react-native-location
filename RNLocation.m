@@ -232,7 +232,7 @@ RCT_EXPORT_METHOD(stopUpdatingHeading)
 -(void)locationManager:(CLLocationManager *)manager
         didEnterRegion:(CLRegion *)region {
     
-    if([region isKindOfClass:[CLCircularRegion class]]) {
+    if([region isMemberOfClass:[CLCircularRegion class]]) {
         CLCircularRegion *circularRegion = (CLCircularRegion *)region;
         NSDictionary *event = @{
                                 @"region": circularRegion.identifier,
@@ -250,7 +250,7 @@ RCT_EXPORT_METHOD(stopUpdatingHeading)
 -(void)locationManager:(CLLocationManager *)manager
          didExitRegion:(CLRegion *)region {
     
-    if([region isKindOfClass:[CLCircularRegion class]]) {
+    if([region isMemberOfClass:[CLCircularRegion class]]) {
         CLCircularRegion *circularRegion = (CLCircularRegion *)region;
         NSDictionary *event = @{
                                 @"region": circularRegion.identifier,
