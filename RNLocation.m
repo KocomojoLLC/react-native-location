@@ -56,13 +56,11 @@ RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(requestAlwaysAuthorization)
 {
-    NSLog(@"react-native-location: requestAlwaysAuthorization");
     [self.locationManager requestAlwaysAuthorization];
 }
 
 RCT_EXPORT_METHOD(requestWhenInUseAuthorization)
 {
-    NSLog(@"react-native-location: requestWhenInUseAuthorization");
     [self.locationManager requestWhenInUseAuthorization];
 }
 
@@ -99,7 +97,6 @@ RCT_EXPORT_METHOD(setAllowsBackgroundLocationUpdates:(BOOL) enabled)
 
 RCT_EXPORT_METHOD(startMonitoringSignificantLocationChanges)
 {
-    NSLog(@"react-native-location: startMonitoringSignificantLocationChanges");
     [self.locationManager startMonitoringSignificantLocationChanges];
 }
 
@@ -107,13 +104,11 @@ RCT_EXPORT_METHOD(startMonitoringForRegion:(NSDictionary *) dict)
 {
     CLCircularRegion *region = [self convertDictToCircularRegion:dict];
     
-    NSLog(@"~~~ Monitoring: %f, %f, %f, %@", region.center.latitude, region.center.longitude, region.radius, region.identifier);
     [self.locationManager startMonitoringForRegion:region];
 }
 
 RCT_EXPORT_METHOD(stopMonitoringForRegion:(NSDictionary *) dict)
 {
-    NSLog(@"Stopping monitoring of: %@", dict);
     [self.locationManager stopMonitoringForRegion:[self convertDictToCircularRegion:dict]];
 }
 
@@ -162,23 +157,18 @@ RCT_EXPORT_METHOD(stopUpdatingHeading)
 {
     switch (authorizationStatus) {
         case kCLAuthorizationStatusAuthorizedAlways:
-            NSLog(@"Authorization Status: authorizedAlways");
             return @"authorizedAlways";
             
         case kCLAuthorizationStatusAuthorizedWhenInUse:
-            NSLog(@"Authorization Status: authorizedWhenInUse");
             return @"authorizedWhenInUse";
             
         case kCLAuthorizationStatusDenied:
-            NSLog(@"Authorization Status: denied");
             return @"denied";
             
         case kCLAuthorizationStatusNotDetermined:
-            NSLog(@"Authorization Status: notDetermined");
             return @"notDetermined";
             
         case kCLAuthorizationStatusRestricted:
-            NSLog(@"Authorization Status: restricted");
             return @"restricted";
     }
 }
@@ -205,7 +195,6 @@ RCT_EXPORT_METHOD(stopUpdatingHeading)
                                    @"heading": @(heading)
                                    };
     
-    NSLog(@"heading: %f", heading);
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"headingUpdated" body:headingEvent];
 }
 
@@ -224,7 +213,6 @@ RCT_EXPORT_METHOD(stopUpdatingHeading)
                                     @"timestamp": @([location.timestamp timeIntervalSince1970] * 1000) // in ms
                                     };
     
-    NSLog(@"%@: lat: %f, long: %f, altitude: %f", location.timestamp, location.coordinate.latitude, location.coordinate.longitude, location.altitude);
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"locationUpdated" body:locationEvent];
 }
 
